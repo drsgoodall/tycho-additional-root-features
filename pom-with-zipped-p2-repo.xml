@@ -1,0 +1,258 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+
+	<groupId>com.exmaple</groupId>
+	<artifactId>com.example.eclipse</artifactId>
+	<packaging>pom</packaging>
+	<version>1.0.0-SNAPSHOT</version>
+
+	<properties>
+		<!-- Tycho version to use -->
+		<tycho.version>0.18.0</tycho.version>
+		<tycho-extras-version>0.18.0</tycho-extras-version>
+
+		<!-- Avoid platform dependent build warning -->
+		<!-- Code files should also be in UTF-8 -->
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+
+		<!-- We wish to install the eclipse RCP product -->
+		<productIU>epp.package.rcp</productIU>
+		<profile>epp.package.rcp</profile>
+		<eclipseRepo>http://download.eclipse.org/releases/kepler</eclipseRepo>
+		<p2.os>win32</p2.os>
+		<p2.ws>win32</p2.ws>
+		<p2.arch>x86_64</p2.arch>
+		<productDestination>${project.build.directory}/eclipse/</productDestination>
+	</properties>
+
+	<build>
+		<plugins>
+			<!-- Copy existing mavenised p2 repository from reactor or maven repository -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>unpack</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<!-- Download and extract mavenised p2 repository -->
+								<artifactItem>
+
+									<groupId>com.example</groupId>
+									<artifactId>com.example.p2.repository</artifactId>
+									<version>1.0.0-SNAPSHOT</version>
+									<type>zip</type>
+									<overWrite>true</overWrite>
+									<outputDirectory>${project.build.directory}/example-repository</outputDirectory>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+
+			<plugin>
+				<groupId>org.eclipse.tycho.extras</groupId>
+				<artifactId>tycho-eclipserun-plugin</artifactId>
+				<version>${tycho-extras-version}</version>
+				<!-- Specify bundles and repositories to be able to run the director -->
+				<!-- Include basic + extras to handle old style update sites -->
+				<configuration>
+					<dependencies>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.ql</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.core</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.console</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.transport.ecf</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.publisher</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.publisher.eclipse</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.repository</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.repository.tools</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.touchpoint.natives</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.touchpoint.eclipse</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.artifact.repository</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.operations</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.updatesite</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.metadata</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.metadata.repository</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.simpleconfigurator</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.director</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.p2.director.app</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.equinox.ds</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+						<dependency>
+							<artifactId>org.eclipse.core.net</artifactId>
+							<type>eclipse-plugin</type>
+						</dependency>
+					</dependencies>	
+
+					<!-- Repository to find p2 dependencies -->
+					<repositories>
+						<repository>
+							<id>juno</id>
+							<layout>p2</layout>
+							<url>http://download.eclipse.org/releases/juno</url>
+						</repository>
+					</repositories>
+				</configuration>
+
+
+				<executions>
+					<!-- First of all instantiate a new product for a specific platform -->
+					<execution>
+						<goals>
+							<goal>eclipse-run</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<id>prepare-product</id>
+						<configuration>
+							<argLine>-Declipse.p2.mirrors=false</argLine>
+							<!-- Do not wrap -->
+							<appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -destination ${productDestination} -repository ${eclipseRepo} -installIUs ${productIU} -tag InitialState -profile ${profile} -profileProperties org.eclipse.update.install.features=true -p2.os ${p2.os} -p2.ws ${p2.ws} -p2.arch ${p2.arch} -roaming</appArgLine>
+						</configuration>
+					</execution>
+
+					<!-- Then install extra eclipse features -->
+					<execution>
+						<goals>
+							<goal>eclipse-run</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<id>install-mylyn-builds</id>
+						<configuration>
+							<argLine>-Declipse.p2.mirrors=false</argLine>
+							<!-- Do not wrap -->
+							<appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -destination ${productDestination} -repository http://download.eclipse.org/mylyn/snapshots/weekly -installIUs org.eclipse.mylyn.hudson.feature.group -tag MylynBuilds -profile ${profile}</appArgLine>
+						</configuration>
+					</execution>
+
+					<!-- Then install EMF SDK features -->
+					<execution>
+						<goals>
+							<goal>eclipse-run</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<id>install-emf-sdk</id>
+						<configuration>
+							<argLine>-Declipse.p2.mirrors=false</argLine>
+							<!-- Do not wrap -->
+							<appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -destination ${productDestination} -repository ${eclipseRepo} -installIUs org.eclipse.emf.sdk.feature.group -tag EMFSDK -profile ${profile}</appArgLine>
+						</configuration>
+					</execution>
+
+					<!-- Then install 3rd party features -->
+					<execution>
+						<goals>
+							<goal>eclipse-run</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<id>install-others</id>
+						<configuration>
+							<argLine>-Declipse.p2.mirrors=false</argLine>
+							<!-- Do not wrap -->
+							<appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -destination ${productDestination} -repository http://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-tycho/0.6.0/N/0.6.0.201210231015/,http://mercurialeclipse.eclipselabs.org.codespot.com/hg.wiki/update_site/stable,http://update.foglyn.com/stable,http://repo1.maven.org/maven2/.m2e/connectors/m2eclipse-buildhelper/0.15.0/N/0.15.0.201207090124/ -installIUs org.sonatype.tycho.m2e.feature.feature.group,com.foglyn.feature.group,mercurialeclipse.feature.group,org.sonatype.m2e.buildhelper.feature.feature.group -tag OtherFeatures -profile ${profile}</appArgLine>
+						</configuration>
+					</execution>
+					<!-- Then install our example feature -->
+					<execution>
+						<goals>
+							<goal>eclipse-run</goal>
+						</goals>
+						<phase>prepare-package</phase>
+						<id>install-example-feature</id>
+						<configuration>
+							<argLine>-Declipse.p2.mirrors=false</argLine>
+							<!-- Do not wrap -->
+							<appArgLine>-consoleLog -application org.eclipse.equinox.p2.director -nosplash -destination ${productDestination} -repository ${project.baseUri}/target/example-repository -installIUs com.example.feature.feature.group -tag ExampleFeature -profile ${profile}</appArgLine>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<groupId>org.apache.maven.plugins</groupId>
+				<version>2.4</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<id>package-product</id>
+						<goals>
+							<goal>single</goal>
+						</goals>
+						<configuration>
+							<!-- Attaches the zip to the build so it can be stored in a maven repository -->
+							<attach>true</attach>
+							<outputDirectory>${project.build.directory}/</outputDirectory>
+							<descriptor>src/main/assembly/eclipse.xml</descriptor>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+		</plugins>
+	</build>
+
+
+</project>
